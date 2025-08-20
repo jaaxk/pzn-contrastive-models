@@ -91,7 +91,8 @@ def get_lastfm_tracks(sp, n_tracks, cluster_size):
             lastfm_count += 1
             tracks_to_write = []
             #get random track from top 1000
-            track = random.choice(top_tracks)
+            #track = random.choice(top_tracks)
+            track = top_tracks[lastfm_count%1000]
             tracks_to_write.append(track)
             #get cluster_size-1 top similar tracks to query
             similar_tracks = track.item.get_similar(limit=cluster_size-1)
