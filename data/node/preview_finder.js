@@ -24,7 +24,7 @@ async function processTracks() {
     console.log("Starting preview finder script...");
     
     // Read and parse tracks file
-    const tracksFile = '../tracks.json';
+    const tracksFile = `../json/tracks_${process.env.TRACKS_IDX}.json`;
     console.log(`Reading tracks from ${tracksFile}...`);
     
     if (!fs.existsSync(tracksFile)) {
@@ -114,7 +114,7 @@ async function processTracks() {
     }
     
     // Save results
-    const outputFile = '../preview_urls.json';
+    const outputFile = `../json/preview_urls_${process.env.TRACKS_IDX}.json`;
     fs.writeFileSync(outputFile, JSON.stringify(results, null, 2));
     console.log(`\n🎧 Found previews for ${foundCount} out of ${tracks.length} tracks.`);
     console.log(`Results saved to ${outputFile}`);
