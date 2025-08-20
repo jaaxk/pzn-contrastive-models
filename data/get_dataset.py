@@ -9,7 +9,7 @@ import pylast
 import json
 import subprocess
 import pandas as pd
-
+import time
 def get_playlist_tracks(sp, n_tracks, cluster_size):
     print(f"Getting playlist tracks for {dataset_name}")
     queries = []
@@ -21,6 +21,7 @@ def get_playlist_tracks(sp, n_tracks, cluster_size):
         track_count = 0
         playlist_count = 0
         while track_count < n_tracks:
+            time.sleep(0.2)
             query = random.choice(queries) #get random query to search for playlist
             results = sp.search(q=query, type="playlist", limit=1, offset=random.randint(0, 950))
             try:
@@ -51,6 +52,7 @@ def get_album_tracks(sp, n_tracks, cluster_size):
     with open(dataset_name, 'a', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         while track_count < n_tracks:
+            time.sleep(0.2)
             #get random letter for query
             letter = random.choice(string.ascii_lowercase)
             #get random album from letter
@@ -88,6 +90,7 @@ def get_lastfm_tracks(sp, n_tracks, cluster_size):
     with open(dataset_name, 'a', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         while track_count < n_tracks:
+            time.sleep(0.2)
             lastfm_count += 1
             tracks_to_write = []
             #get random track from top 1000
@@ -154,7 +157,9 @@ def main():
 
     sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
-        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET")))
+        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET")),
+        retries=10,
+        )
 
     # Set up CSV file with headers
     
