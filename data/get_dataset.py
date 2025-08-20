@@ -143,9 +143,9 @@ def get_preview_urls():
     print(preview_urls)
     #write preview_urls to csv
     print('writing preview urls to csv')
-    df = pd.read_csv("tracks_dataset.csv")
+    df = pd.read_csv(dataset_name)
     df["previewURL"] = df["trackID"].map(preview_urls)
-    df.to_csv("tracks_dataset.csv", index=False)
+    df.to_csv(dataset_name, index=False)
     
 def main():
 
