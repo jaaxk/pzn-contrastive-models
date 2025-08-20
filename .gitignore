@@ -1,3 +1,7 @@
+*.wav
+train_test/venv
+*.mp3
+*.pt
 data/json
 data/node/node_modules
 data/tracks.json

@@ -253,9 +253,9 @@ def main():
         writer = csv.writer(csvfile)
         writer.writerow(['name', 'artist', 'trackID', 'clusterID', 'clusterType', 'previewURL'])
 
-    get_playlist_tracks(sp, cluster_size=4) #default 95,000 tracks
-    get_album_tracks(sp, cluster_size=4) #default 52,000 tracks
-    get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4) #default 304,144 tracks
+    #get_playlist_tracks(sp, n_tracks=4, cluster_size=4) #default 95,000 tracks
+    #get_album_tracks(sp, n_tracks=4, cluster_size=4) #default 52,000 tracks
+    get_lastfm_tracks(sp, n_tracks=16, cluster_size=4) #default 304,144 tracks
     get_preview_urls(n_processes=1)
 
     #get test set
