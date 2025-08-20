@@ -1,3 +1,8 @@
+data/node/node_modules
+data/tracks.json
+data/preview_urls.json
+data/venv
+*.csv
 .DS_Store
 .cache
 data/.env
