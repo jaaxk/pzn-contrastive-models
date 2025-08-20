@@ -13,7 +13,7 @@ import time
 import numpy as np
 
 
-def get_playlist_tracks(sp, n_tracks=None, cluster_size=4):
+def get_playlist_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
     """
     Gets 1000 playlists from each query and cluster_size tracks from each playlist
     Max n_tracks is cluster_size*950*len(queries (currently 25))
@@ -31,15 +31,18 @@ def get_playlist_tracks(sp, n_tracks=None, cluster_size=4):
         writer = csv.writer(csvfile)
         track_count = 0
         playlist_count = 0
-        i = 0
+        query_count = start_query
 
         while track_count < n_tracks:
             try:
-                query = queries[i]
+                query = queries[query_count]
             except IndexError:
                 print('Exausted playlist queries')
                 return
-            i+=1
+            query_count+=1
+            with open('.resume', 'w') as f:
+                f.write(f'p:{query_count}')
+            
 
             #results = sp.search(q=query, type="playlist", limit=1, offset=random.randint(0, 950))
             results = []
@@ -52,11 +55,11 @@ def get_playlist_tracks(sp, n_tracks=None, cluster_size=4):
                 if playlist:
                     playlist_count += 1
                     tracks = sp.playlist_tracks(playlist['id'])
-                    time.sleep(0.2)
+                    time.sleep(0.3)
                     if len(tracks['items']) > 5:
                         track_indices = random.sample(range(len(tracks['items'])), 5) #get random track indices from the playlist
-                        for cluster_count, i in enumerate(track_indices):
-                            track = tracks['items'][i]
+                        for cluster_count, j in enumerate(track_indices):
+                            track = tracks['items'][j]
                             if track and track['track']:
                                 #if test_set:
                                     #if track['track']['id'] in train_set_ids:
@@ -70,7 +73,7 @@ def get_playlist_tracks(sp, n_tracks=None, cluster_size=4):
                                 if cluster_count >= cluster_size:
                                     break
 
-def get_album_tracks(sp, n_tracks=None, cluster_size=4):
+def get_album_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
     """
     Gets 1000 albums from each letter and cluster_size tracks from each album
     Max n_tracks is cluster_size*500*26
@@ -82,17 +85,20 @@ def get_album_tracks(sp, n_tracks=None, cluster_size=4):
 
     album_count = 0
     track_count = 0
-    i=0
+    query_counter = start_query
     with open(dataset_name, 'a', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         while track_count < n_tracks:
-            #get random letter for query
+            #get letter for query
             try:
-                letter = string.ascii_lowercase[i]
+                letter = string.ascii_lowercase[query_counter]
             except IndexError:
                 print('Exausted album queries')
                 return
-            i+=1
+
+            query_counter+=1
+            with open('.resume', 'w') as f:
+                f.write(f'a:{query_counter}')
             #get random album from letter
             results = []
             for i in range(0, min(500, n_tracks), 50):
@@ -104,11 +110,11 @@ def get_album_tracks(sp, n_tracks=None, cluster_size=4):
                 if album:
                     album_count += 1
                     tracks = sp.album_tracks(album['id'])
-                    time.sleep(0.2)
+                    time.sleep(0.4)
                     if len(tracks['items']) > cluster_size:
                         track_indices = random.sample(range(len(tracks['items'])), cluster_size)
-                        for cluster_count, i in enumerate(track_indices):
-                            track = tracks['items'][i]
+                        for cluster_count, j in enumerate(track_indices):
+                            track = tracks['items'][j]
                             if track:
                                 writer.writerow([track['name'], track['artists'][0]['name'], track['id'], f'a{album_count}', 'album', track['preview_url']])
                                 track_count += 1
@@ -120,7 +126,7 @@ def get_album_tracks(sp, n_tracks=None, cluster_size=4):
                                     break
         
 
-def get_lastfm_tracks(sp, n_tracks=None, cluster_size=4):
+def get_lastfm_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
     """
     Gets seed tracks from lastfm dataset (76,036 tracks) and cluster_size similar tracks from each seed track using Last.fm similarity API
     Max n_tracks is cluster_size*76,036
@@ -138,21 +144,25 @@ def get_lastfm_tracks(sp, n_tracks=None, cluster_size=4):
     #top_tracks = network.get_top_tracks(limit=1000) #max is 1000 for this api
     lastfm_tracks = pd.read_csv('Lastfm_reduced.csv')
     track_count = 0
-    lastfm_count = 0
+    query_counter = start_query
     with open(dataset_name, 'a', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         while track_count < n_tracks:
-            lastfm_count += 1
             tracks_to_write = []
             #get random track from top 1000
             #track = random.choice(top_tracks)
             #track = top_tracks[lastfm_count%1000]
             #get artist and track from the CSV row
             try:
-                row = lastfm_tracks.iloc[lastfm_count]
+                row = lastfm_tracks.iloc[query_counter]
             except IndexError:
                 print('Exausted lastfm dataset')
                 return
+
+            query_counter+=1
+            with open('.resume', 'w') as f:
+                f.write(f'l:{query_counter}')
+
             artist_name = row['Artist']
             track_name = row['Track']
             #search for the track using Last.fm API
@@ -175,7 +185,7 @@ def get_lastfm_tracks(sp, n_tracks=None, cluster_size=4):
                     #if test_set:
                         #if sp_track['tracks']['items'][0]['id'] in train_set_ids:
                             #continue
-                    writer.writerow([sp_track['tracks']['items'][0]['name'], sp_track['tracks']['items'][0]['artists'][0]['name'], sp_track['tracks']['items'][0]['id'], f'l{lastfm_count}', 'lastfm', sp_track['tracks']['items'][0]['preview_url']])
+                    writer.writerow([sp_track['tracks']['items'][0]['name'], sp_track['tracks']['items'][0]['artists'][0]['name'], sp_track['tracks']['items'][0]['id'], f'l{query_counter}', 'lastfm', sp_track['tracks']['items'][0]['preview_url']])
                 track_count += 1
                 if track_count%100 == 0:
                     print(f"Lastfm tracks: {track_count}", end="\r")
@@ -187,6 +197,8 @@ def get_lastfm_tracks(sp, n_tracks=None, cluster_size=4):
 
 def get_preview_urls(n_processes=10):
     print("Getting preview urls...")
+    with open('.resume', 'w') as f:
+        f.write('u:0')
 
     full_df = pd.read_csv(dataset_name)
     #split intto n_processes datasets
@@ -252,11 +264,32 @@ def main():
     with open(dataset_name, 'w', newline='', encoding='utf-8') as csvfile: #set up csv file with headers
         writer = csv.writer(csvfile)
         writer.writerow(['name', 'artist', 'trackID', 'clusterID', 'clusterType', 'previewURL'])
+        
+    #resume from checkpoint
+    if os.path.exists('.resume'):
+        with open('.resume', 'r') as f:
+            func_name = f.read().split(':')[0]
+            start_query = int(f.read().split(':')[1])
+        if func_name == 'p':
+            get_playlist_tracks(sp, cluster_size=4, start_query=start_query) 
+            get_album_tracks(sp, cluster_size=4) 
+            get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4) 
+            get_preview_urls(n_processes=1)
+        elif func_name == 'a':
+            get_album_tracks(sp, cluster_size=4, start_query=start_query)
+            get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4) 
+            get_preview_urls(n_processes=1)
+        elif func_name == 'l':
+            get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4, start_query=start_query)
+            get_preview_urls(n_processes=1)
+        elif func_name == 'u':
+            get_preview_urls(n_processes=1)
 
-    #get_playlist_tracks(sp, n_tracks=4, cluster_size=4) #default 95,000 tracks
-    #get_album_tracks(sp, n_tracks=4, cluster_size=4) #default 52,000 tracks
-    get_lastfm_tracks(sp, n_tracks=16, cluster_size=4) #default 304,144 tracks
-    get_preview_urls(n_processes=1)
+    else:
+        get_playlist_tracks(sp, cluster_size=4) #default 95,000 tracks
+        get_album_tracks(sp, cluster_size=4) #default 52,000 tracks
+        get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4) #default 304,144 tracks
+        get_preview_urls(n_processes=1)
 
     #get test set
     """test_set = True
