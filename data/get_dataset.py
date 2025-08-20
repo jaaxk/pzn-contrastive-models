@@ -217,7 +217,7 @@ def get_preview_urls(n_processes=10):
     for i, proc in enumerate(processes):
         stdout, stderr = proc.communicate()
         print(f'Subprocess {i} output:')
-        #print(stdout)
+        print(stdout)
         if proc.returncode != 0:
             print(f"Error in subprocess {i}: {stderr}")
 
@@ -253,10 +253,10 @@ def main():
         writer = csv.writer(csvfile)
         writer.writerow(['name', 'artist', 'trackID', 'clusterID', 'clusterType', 'previewURL'])
 
-    get_playlist_tracks(sp, n_tracks=8, cluster_size=4) #default 95,000 tracks
-    get_album_tracks(sp, n_tracks=8, cluster_size=4) #default 52,000 tracks
-    get_lastfm_tracks(sp, n_tracks=8, cluster_size=4) #default 304,144 tracks
-    get_preview_urls(n_processes=10)
+    get_playlist_tracks(sp, cluster_size=4) #default 95,000 tracks
+    get_album_tracks(sp, cluster_size=4) #default 52,000 tracks
+    get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4) #default 304,144 tracks
+    get_preview_urls(n_processes=1)
 
     #get test set
     """test_set = True
