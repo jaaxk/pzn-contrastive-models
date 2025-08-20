@@ -64,12 +64,13 @@ def get_playlist_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
                                 #if test_set:
                                     #if track['track']['id'] in train_set_ids:
                                         #continue
-                                writer.writerow([track['track']['name'], track['track']['artists'][0]['name'], track['track']['id'], f'p{playlist_count}', 'playlist', track['track']['preview_url']]) #write random track info to csv
+                                writer.writerow([track['track']['name'], track['track']['artists'][0]['name'], track['track']['id'], f'p{playlist_count}', 'playlist', 'None']) #write random track info to csv
                                 track_count += 1
                                 if track_count%100 == 0:
                                     print(f"Playlist tracks: {track_count}", end="\r")
                                     csvfile.flush()
                                     time.sleep(0.2)
+                                    get_preview_urls()
                                 if cluster_count >= cluster_size:
                                     break
 
@@ -116,12 +117,13 @@ def get_album_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
                         for cluster_count, j in enumerate(track_indices):
                             track = tracks['items'][j]
                             if track:
-                                writer.writerow([track['name'], track['artists'][0]['name'], track['id'], f'a{album_count}', 'album', track['preview_url']])
+                                writer.writerow([track['name'], track['artists'][0]['name'], track['id'], f'a{album_count}', 'album', 'None'])
                                 track_count += 1
                                 if track_count%100 == 0:
                                     print(f"Album tracks: {track_count}", end="\r")
                                     csvfile.flush()
                                     time.sleep(0.2)
+                                    get_preview_urls()
                                 if cluster_count >= cluster_size:
                                     break
         
@@ -185,22 +187,24 @@ def get_lastfm_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
                     #if test_set:
                         #if sp_track['tracks']['items'][0]['id'] in train_set_ids:
                             #continue
-                    writer.writerow([sp_track['tracks']['items'][0]['name'], sp_track['tracks']['items'][0]['artists'][0]['name'], sp_track['tracks']['items'][0]['id'], f'l{query_counter}', 'lastfm', sp_track['tracks']['items'][0]['preview_url']])
+                    writer.writerow([sp_track['tracks']['items'][0]['name'], sp_track['tracks']['items'][0]['artists'][0]['name'], sp_track['tracks']['items'][0]['id'], f'l{query_counter}', 'lastfm', 'None'])
                 track_count += 1
                 if track_count%100 == 0:
                     print(f"Lastfm tracks: {track_count}", end="\r")
                     csvfile.flush()
                     time.sleep(0.2)
+                    get_preview_urls()
                 if cluster_count >= cluster_size:
                     break
 
 
-def get_preview_urls(n_processes=10):
+def get_preview_urls(n_processes=1):
     print("Getting preview urls...")
     with open('.resume', 'w') as f:
         f.write('u:0')
 
     full_df = pd.read_csv(dataset_name)
+    full_df = full_df[full_df['previewURL'] != 'None']
     #split intto n_processes datasets
     df_list = np.array_split(full_df, n_processes)
     for i, df in enumerate(df_list):
@@ -264,7 +268,7 @@ def main():
     with open(dataset_name, 'w', newline='', encoding='utf-8') as csvfile: #set up csv file with headers
         writer = csv.writer(csvfile)
         writer.writerow(['name', 'artist', 'trackID', 'clusterID', 'clusterType', 'previewURL'])
-        
+
     #resume from checkpoint
     if os.path.exists('.resume'):
         with open('.resume', 'r') as f:
