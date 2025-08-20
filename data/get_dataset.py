@@ -169,9 +169,9 @@ def main():
         writer = csv.writer(csvfile)
         writer.writerow(['name', 'artist', 'trackID', 'clusterID', 'clusterType', 'previewURL'])
 
-    get_playlist_tracks(sp, n_tracks=50, cluster_size=5)
-    get_album_tracks(sp, n_tracks=50, cluster_size=5)
-    get_lastfm_tracks(sp, n_tracks=20, cluster_size=5)
+    get_playlist_tracks(sp, n_tracks=75000, cluster_size=5)
+    get_album_tracks(sp, n_tracks=75000, cluster_size=5)
+    #get_lastfm_tracks(sp, n_tracks=5000, cluster_size=5)
     get_preview_urls()
 
     #get test set
@@ -185,9 +185,9 @@ def main():
     with open(dataset_name, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['name', 'artist', 'trackID', 'clusterID', 'clusterType', 'previewURL'])
-    get_playlist_tracks(sp, n_tracks=50, cluster_size=10)
-    get_album_tracks(sp, n_tracks=50, cluster_size=10)
-    get_lastfm_tracks(sp, n_tracks=50, cluster_size=10)
+    #get_playlist_tracks(sp, n_tracks=150, cluster_size=15)
+    #get_album_tracks(sp, n_tracks=150, cluster_size=15)
+    get_lastfm_tracks(sp, n_tracks=300, cluster_size=15)
     get_preview_urls()
 
 
