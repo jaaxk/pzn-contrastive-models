@@ -2,6 +2,7 @@
 *.wav
 train_test/venv
 *.mp3
+data/res.txt
 *.pt
 data/json
 data/node/node_modules

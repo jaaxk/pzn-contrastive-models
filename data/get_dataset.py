@@ -272,8 +272,9 @@ def main():
     #resume from checkpoint
     if os.path.exists('.resume'):
         with open('.resume', 'r') as f:
-            func_name = f.read().split(':')[0]
-            start_query = int(f.read().split(':')[1])
+            content = f.read()
+            func_name = content.split(':')[0]
+            start_query = int(content.split(':')[1])
         if func_name == 'p':
             get_playlist_tracks(sp, cluster_size=4, start_query=start_query) 
             get_album_tracks(sp, cluster_size=4) 

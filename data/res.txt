@@ -1,0 +1,13 @@
+Getting playlist tracks for train_tracks.csv
+Found 946 playlists for party
+
+Playlist tracks: 100Getting preview urls...
+/gpfs/scratch/jvaska/pzn/data/venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:57: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+/gpfs/scratch/jvaska/pzn/data/get_dataset.py:214: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  "name": row[0],
+/gpfs/scratch/jvaska/pzn/data/get_dataset.py:215: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  "artist": row[1],
+/gpfs/scratch/jvaska/pzn/data/get_dataset.py:216: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  "spotify_track_id": row[2]
+running preview finder for subprocess 0
