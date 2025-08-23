@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -p hbm-long-96core
+#SBATCH -p long-40core
 #SBATCH -t 48:00:00
 #SBATCH --output res.txt
 

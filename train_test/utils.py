@@ -4,9 +4,14 @@ import tqdm
 import subprocess
 import time
 
-def download_and_preprocess_previews(preview_urls, track_ids, output_dir):
+def download_and_preprocess_previews(preview_urls, track_ids, cluster_ids, output_dir):
     wav_paths = []
-    for url, track_id in tqdm.tqdm(zip(preview_urls, track_ids)):
+    cluster_ids_list = []
+    track_ids_list = []
+    for url, track_id, cluster_id in tqdm.tqdm(zip(preview_urls, track_ids, cluster_ids)):
+        if not str(url).startswith('http'):
+            print(f"Skipping {url} because it is not a valid URL")
+            continue
         wav_path = os.path.join(output_dir, f'{track_id}.wav')
         if not os.path.exists(wav_path):
             retries = 0
@@ -37,5 +42,7 @@ def download_and_preprocess_previews(preview_urls, track_ids, output_dir):
                 os.remove(os.path.join(output_dir, f"{track_id}.mp3"))
         if os.path.exists(os.path.join(output_dir, f'{track_id}.wav')):
             wav_paths.append(wav_path)
+            track_ids_list.append(track_id)
+            cluster_ids_list.append(cluster_id)
 
-    return wav_paths
+    return wav_paths, cluster_ids_list, track_ids_list

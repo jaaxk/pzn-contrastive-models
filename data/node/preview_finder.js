@@ -56,7 +56,7 @@ async function processTracks() {
       
       if (!name || !artist) {
         console.log(`⚠️  Skipping track ${processedCount}/${tracks.length}: Missing name or artist`);
-        results[key] = null;
+        results[key] = 'no_preview';
         continue;
       }
       
@@ -84,9 +84,8 @@ async function processTracks() {
           const previewUrls = song.previewUrls || [];
           const previewUrl = previewUrls.length > 0 ? previewUrls[0] : null;
           
-          results[key] = previewUrl;
-          
           if (previewUrl) {
+            results[key] = previewUrl;
             foundCount++;
             console.log(`🎵 Track: ${song.name}`);
             console.log(`   Artist: ${song.artists?.[0]?.name || artist}`);
@@ -94,10 +93,11 @@ async function processTracks() {
             console.log(`   Track ID: ${song.trackId || 'N/A'}`);
             console.log(`   Preview URL: ${previewUrl}`);
           } else {
+            results[key] = 'no_preview';
             console.log(`⚠️  No preview URL available for: ${key}`);
           }
         } else {
-          results[key] = null;
+          results[key] = 'no_preview';
           console.log(`❌ No matches found for: ${key}`);
           if (result?.error) {
             console.log(`   Error: ${result.error}`);
@@ -106,7 +106,7 @@ async function processTracks() {
       } catch (error) {
         console.error(`🔥 Error during search for ${key}:`, error.message);
         console.error(error.stack);
-        results[key] = null;
+        results[key] = 'no_preview';
       }
       
       // Add a small delay between requests to avoid rate limiting

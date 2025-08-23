@@ -11,6 +11,7 @@ import subprocess
 import pandas as pd
 import time
 import numpy as np
+from scripts.spotify_preview import get_spotify_preview_url
 
 
 def get_playlist_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
@@ -25,7 +26,7 @@ def get_playlist_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
         queries = f.readlines()
 
     if n_tracks is None:
-        n_tracks = cluster_size*950*len(queries) #set default to max n_tracks
+        n_tracks = cluster_size*200*len(queries) #set default to max n_tracks
 
     with open(dataset_name, 'a', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
@@ -46,16 +47,16 @@ def get_playlist_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
 
             #results = sp.search(q=query, type="playlist", limit=1, offset=random.randint(0, 950))
             results = []
-            for i in range(0, min(950, n_tracks), 50):
+            for i in range(0, min(200, n_tracks), 50):
                 results.extend(sp.search(q=query, type="playlist", limit=50, offset=i)['playlists']['items'])
-                time.sleep(0.5)
+                time.sleep(2)
             print(f'Found {len(results)} playlists for {query}')
   
             for playlist in results:
                 if playlist:
                     playlist_count += 1
                     tracks = sp.playlist_tracks(playlist['id'])
-                    time.sleep(0.3)
+                    time.sleep(0.7)
                     if len(tracks['items']) > 5:
                         track_indices = random.sample(range(len(tracks['items'])), 5) #get random track indices from the playlist
                         for cluster_count, j in enumerate(track_indices):
@@ -64,13 +65,15 @@ def get_playlist_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
                                 #if test_set:
                                     #if track['track']['id'] in train_set_ids:
                                         #continue
-                                writer.writerow([track['track']['name'], track['track']['artists'][0]['name'], track['track']['id'], f'p{playlist_count}', 'playlist', 'None']) #write random track info to csv
-                                track_count += 1
+                                preview_url = get_spotify_preview_url(track['track']['id'])
+                                if preview_url:
+                                    writer.writerow([track['track']['name'], track['track']['artists'][0]['name'], track['track']['id'], f'p{playlist_count}', 'playlist', preview_url]) #write random track info to csv
+                                    track_count += 1
                                 if track_count%100 == 0:
                                     print(f"Playlist tracks: {track_count}", end="\r")
                                     csvfile.flush()
                                     time.sleep(0.2)
-                                    get_preview_urls()
+                                    #get_preview_urls()
                                 if cluster_count >= cluster_size:
                                     break
 
@@ -82,7 +85,7 @@ def get_album_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
     print(f"Getting album tracks for {dataset_name}")
 
     if n_tracks is None:
-        n_tracks = cluster_size*500*26 #set default to max n_tracks
+        n_tracks = cluster_size*100*26 #set default to max n_tracks
 
     album_count = 0
     track_count = 0
@@ -102,28 +105,30 @@ def get_album_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
                 f.write(f'a:{query_counter}')
             #get random album from letter
             results = []
-            for i in range(0, min(500, n_tracks), 50):
+            for i in range(0, min(100, n_tracks), 50):
                 results.extend(sp.search(q=letter, type="album", limit=50, offset=i)['albums']['items'])
-                time.sleep(0.5)
+                time.sleep(1)
             print(f'Found {len(results)} albums for {letter}')
 
             for album in results:
                 if album:
                     album_count += 1
                     tracks = sp.album_tracks(album['id'])
-                    time.sleep(0.4)
+                    time.sleep(0.7)
                     if len(tracks['items']) > cluster_size:
                         track_indices = random.sample(range(len(tracks['items'])), cluster_size)
                         for cluster_count, j in enumerate(track_indices):
                             track = tracks['items'][j]
                             if track:
-                                writer.writerow([track['name'], track['artists'][0]['name'], track['id'], f'a{album_count}', 'album', 'None'])
-                                track_count += 1
+                                preview_url = get_spotify_preview_url(track['id'])
+                                if preview_url:
+                                    writer.writerow([track['name'], track['artists'][0]['name'], track['id'], f'a{album_count}', 'album', preview_url])
+                                    track_count += 1
                                 if track_count%100 == 0:
                                     print(f"Album tracks: {track_count}", end="\r")
                                     csvfile.flush()
                                     time.sleep(0.2)
-                                    get_preview_urls()
+                                    #get_preview_urls()
                                 if cluster_count >= cluster_size:
                                     break
         
@@ -181,39 +186,69 @@ def get_lastfm_tracks(sp, n_tracks=None, cluster_size=4, start_query=0):
                     track = track.item
                 except:
                     pass
-                time.sleep(0.2)
+                time.sleep(0.7)
                 sp_track = sp.search(q=f"{track.get_name()} {track.get_artist().get_name()}", type="track", limit=1)
                 if sp_track['tracks']['items'][0]:
                     #if test_set:
                         #if sp_track['tracks']['items'][0]['id'] in train_set_ids:
                             #continue
-                    writer.writerow([sp_track['tracks']['items'][0]['name'], sp_track['tracks']['items'][0]['artists'][0]['name'], sp_track['tracks']['items'][0]['id'], f'l{query_counter}', 'lastfm', 'None'])
+                    preview_url = get_spotify_preview_url(sp_track['tracks']['items'][0]['id'])
+                    if preview_url:
+                        writer.writerow([sp_track['tracks']['items'][0]['name'], sp_track['tracks']['items'][0]['artists'][0]['name'], sp_track['tracks']['items'][0]['id'], f'l{query_counter}', 'lastfm', preview_url])
                 track_count += 1
                 if track_count%100 == 0:
                     print(f"Lastfm tracks: {track_count}", end="\r")
                     csvfile.flush()
                     time.sleep(0.2)
-                    get_preview_urls()
+                    #get_preview_urls()
                 if cluster_count >= cluster_size:
                     break
 
-
-def get_preview_urls(n_processes=1):
+"""def get_preview_urls():
     print("Getting preview urls...")
-    with open('.resume', 'w') as f:
-        f.write('u:0')
+    df = pd.read_csv(dataset_name)
+    df = df[~df['previewURL'].fillna('').str.startswith('http')]
+    df = df.dropna(subset=['artist', 'name', 'trackID'])
+    print(len(df))
+
+    trackID_to_preview_url = {}
+    for index, row in df.iterrows():
+        track_id = row.iloc[2]
+        preview_url = get_spotify_preview_url(track_id)
+        if preview_url:
+            trackID_to_preview_url[track_id] = preview_url
+        else:
+            trackID_to_preview_url[track_id] = 'no_preview'
+        if index%100 == 0:
+            print(f"Processed {index} tracks", end="\r")
+            df["previewURL"] = df["trackID"].map(trackID_to_preview_url)
+            df.to_csv(dataset_name, index=False)
+
+    df["previewURL"] = df["trackID"].map(trackID_to_preview_url)
+    df.to_csv(dataset_name, index=False)"""
+
+
+
+"""def get_preview_urls(n_processes=100, parallel=False):
+    print("Getting preview urls...")
 
     full_df = pd.read_csv(dataset_name)
-    full_df = full_df[full_df['previewURL'] != 'None']
+    #print(full_df.head())
+    full_df['previewURL'] = full_df['previewURL'].fillna('None')
+    full_df = full_df[~full_df['previewURL'].str.startswith('http') & (full_df['previewURL'] != 'no_preview')]
+    full_df = full_df.dropna(subset=['artist', 'name', 'trackID'])
+    #print(full_df.head())
+    print(len(full_df))
+
     #split intto n_processes datasets
     df_list = np.array_split(full_df, n_processes)
     for i, df in enumerate(df_list):
         tracks_json = []
         for index, row in df.iterrows():
             tracks_json.append({
-                    "name": row[0],
-                    "artist": row[1],
-                    "spotify_track_id": row[2]
+                    "name": row.iloc[0],
+                    "artist": row.iloc[1],
+                    "spotify_track_id": row.iloc[2]
             })
     
         with open(f"json/tracks_{i}.json", 'w', encoding='utf-8') as f:
@@ -225,17 +260,22 @@ def get_preview_urls(n_processes=1):
         env = os.environ.copy()
         env["TRACKS_IDX"] = str(i)
         print(f'running preview finder for subprocess {i}')
-        proc = subprocess.Popen(node_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env, cwd="node")
-        time.sleep(1)
-        processes.append(proc)
+        if parallel:
+            proc = subprocess.Popen(node_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env, cwd="node")
+            time.sleep(1)
+            processes.append(proc)
+        else:
+            subprocess.run(node_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env, cwd="node")
+            time.sleep(0.5)
     
     # Wait for all processes to complete
-    for i, proc in enumerate(processes):
-        stdout, stderr = proc.communicate()
-        print(f'Subprocess {i} output:')
-        print(stdout)
-        if proc.returncode != 0:
-            print(f"Error in subprocess {i}: {stderr}")
+    if parallel:
+        for i, proc in enumerate(processes):
+            stdout, stderr = proc.communicate()
+            #print(f'Subprocess {i} output:')
+            #print(stdout)
+            if proc.returncode != 0:
+                print(f"Error in subprocess {i}: {stderr}")
 
     #read preview_urls.json from preview_finder.js
     preview_urls = {}
@@ -247,7 +287,7 @@ def get_preview_urls(n_processes=1):
     print('writing preview urls to csv')
     df = pd.read_csv(dataset_name)
     df["previewURL"] = df["trackID"].map(preview_urls)
-    df.to_csv(dataset_name, index=False)
+    df.to_csv(dataset_name, index=False)"""
     
 def main():
 
@@ -257,6 +297,7 @@ def main():
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
         client_secret=os.getenv("SPOTIPY_CLIENT_SECRET")),
         retries=10,
+        
         )
 
     #get train set
@@ -264,37 +305,39 @@ def main():
     global dataset_name
     dataset_name = "train_tracks.csv"
     #test_set = False
-
-    with open(dataset_name, 'w', newline='', encoding='utf-8') as csvfile: #set up csv file with headers
-        writer = csv.writer(csvfile)
-        writer.writerow(['name', 'artist', 'trackID', 'clusterID', 'clusterType', 'previewURL'])
+    if not os.path.exists('.resume'):
+        with open(dataset_name, 'w', newline='', encoding='utf-8') as csvfile: #set up csv file with headers
+            writer = csv.writer(csvfile)
+            writer.writerow(['name', 'artist', 'trackID', 'clusterID', 'clusterType', 'previewURL'])
 
     #resume from checkpoint
     if os.path.exists('.resume'):
         with open('.resume', 'r') as f:
             content = f.read()
-            func_name = content.split(':')[0]
-            start_query = int(content.split(':')[1])
+            func_name = content.split(':')[0].strip()
+            print(func_name)
+            if 'u' not in func_name:
+                start_query = int(content.split(':')[1])
         if func_name == 'p':
             get_playlist_tracks(sp, cluster_size=4, start_query=start_query) 
             get_album_tracks(sp, cluster_size=4) 
             get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4) 
-            get_preview_urls(n_processes=1)
+            #get_preview_urls()
         elif func_name == 'a':
             get_album_tracks(sp, cluster_size=4, start_query=start_query)
             get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4) 
-            get_preview_urls(n_processes=1)
+            #get_preview_urls()
         elif func_name == 'l':
             get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4, start_query=start_query)
-            get_preview_urls(n_processes=1)
-        elif func_name == 'u':
-            get_preview_urls(n_processes=1)
+            #get_preview_urls()
+        #elif func_name == 'u':
+            #get_preview_urls()
 
     else:
         get_playlist_tracks(sp, cluster_size=4) #default 95,000 tracks
         get_album_tracks(sp, cluster_size=4) #default 52,000 tracks
         get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4) #default 304,144 tracks
-        get_preview_urls(n_processes=1)
+        #get_preview_urls()
 
     #get test set
     """test_set = True

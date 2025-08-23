@@ -3,6 +3,8 @@
 train_test/venv
 *.mp3
 data/res.txt
+train_test/eval_results/
+train_test/res.txt
 *.pt
 data/json
 data/node/node_modules
@@ -12,4 +14,5 @@ data/venv
 *.csv
 .DS_Store
 .cache
+*/__pychache__/*
 data/.env

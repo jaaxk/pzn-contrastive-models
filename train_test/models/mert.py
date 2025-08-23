@@ -2,6 +2,8 @@ from transformers import AutoModel, Wav2Vec2FeatureExtractor
 import torch
 import torch.nn as nn
 import torchaudio
+import os
+import soundfile as sf
 
 class MERT(nn.Module):
     def __init__(self, model_path):
@@ -9,7 +11,7 @@ class MERT(nn.Module):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).to(self.device)
         self.processor = Wav2Vec2FeatureExtractor.from_pretrained(model_path, trust_remote_code=True)
-        self.aggregator = nn.Conv1d(in_channels=25, out_channels=1, kernel_size=1)
+        self.aggregator = nn.Conv1d(in_channels=25, out_channels=1, kernel_size=1).to(self.device)
 
     def load_wavs(self, wav_paths):
         """
@@ -17,9 +19,12 @@ class MERT(nn.Module):
         """
         waveforms = []
         for wav_path in wav_paths:
-            waveform, sr = torchaudio.load(wav_path)
+            if not os.path.exists(wav_path):
+                print(f"Skipping {wav_path} because it does not exist")
+                waveform = np.zeros(24000*29)
+            waveform, sr = sf.read(wav_path, dtype='float32')
             waveform = waveform.squeeze()
-            waveforms.append(waveform.numpy())
+            waveforms.append(waveform)
         return waveforms
 
     def forward(self, wav_paths):
@@ -33,7 +38,7 @@ class MERT(nn.Module):
             return_tensors="pt",
             padding=True,
             truncation=True,
-            max_length=720000) #30s of 24kHz audio
+            max_length=720000).to(self.device) #30s of 24kHz audio
     
         print(inputs['input_values'].shape) #batch size, samples (time*sample_rate)
 
