@@ -22,6 +22,9 @@ from sklearn.metrics.cluster import contingency_matrix
 #from matplotlib.colors import get_cmap
 from generate_tsne_report import generate_report
 
+device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f'DEVICE: {device}')
+
 def purity_scores(y_true, y_pred):
     C = contingency_matrix(y_true, y_pred)
     purity_pred = np.sum(np.max(C, axis=0)) / np.sum(C)   # purity by predicted clusters
@@ -64,10 +67,25 @@ def clustering_report(y_true, y_pred, X=None):
         report["davies_bouldin"] = davies_bouldin_score(X, y_pred)
     return report
 
-def load_model(model_name):
-    from models.mert import MERT
+def load_model(model_name): 
     if model_name == "mert_base":
+        from models.mert.mert import MERT
         return MERT('m-a-p/MERT-v1-330M')
+    elif model_name == 'clmr_base':
+        from models.clmr.sample_cnn import SampleCNN
+        from models.clmr.utils import load_encoder_checkpoint
+        strides = [3, 3, 3, 3, 3, 3, 3, 3, 3]
+        # We want encoder features (512-d). Bypass the fc layer.
+        out_dim = 512
+        model_path = 'models/clmr/checkpoints/clmr_checkpoint_10000.pt'
+        print(f'Loading CLMR base model from {model_path}')
+        sample_cnn = SampleCNN(strides, False, out_dim)
+        state_dict = load_encoder_checkpoint(model_path, out_dim)
+        sample_cnn.load_state_dict(state_dict)
+        # Replace classification head with identity to expose 512-d embeddings
+        import torch.nn as nn
+        sample_cnn.fc = nn.Identity()
+        return sample_cnn
     else:
         return None
 
@@ -90,10 +108,17 @@ def main():
    
     #download previews
     print('df cluster ids: ', df['clusterID'].tolist())
-    wav_paths, cluster_ids, track_ids = download_and_preprocess_previews(df['previewURL'].tolist(), df['trackID'].tolist(),  df['clusterID'].tolist(), args.previews_dir)
-    print('cluster_ids: ', cluster_ids)
-    device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f'DEVICE: {device}')
+    if args.model_name == 'clmr_base':
+        from models.clmr.utils import clmr_load_wavs
+        load_wavs = clmr_load_wavs
+        sample_rate = 22050
+        embedding_dim = 512
+    elif args.model_name == 'mert_base':
+        from models.mert.utils import mert_load_wavs
+        load_wavs = mert_load_wavs
+        sample_rate = 24000
+        embedding_dim = 1024
+    wav_paths, cluster_ids, track_ids = download_and_preprocess_previews(df['previewURL'].tolist(), df['trackID'].tolist(),  df['clusterID'].tolist(), args.previews_dir, sample_rate=sample_rate)
     
 
     print(args.embeddings_path)
@@ -101,19 +126,23 @@ def main():
     if args.embeddings_path is None:
         #load model
         model = load_model(args.model_name)
+        model = model.to(device)
+        model.eval()
 
-        #generate embeddings in batches
-        all_embeddings = torch.zeros(len(wav_paths), 1024)
-
-        for i in tqdm(range(0, len(wav_paths), args.batch_size)):
-            batch = wav_paths[i:min(i+args.batch_size, len(wav_paths))]
+        #generate embeddings in batches (512-d from encoder)
+        all_embeddings = torch.zeros(len(wav_paths), embedding_dim)
+        for i in tqdm(range(0, len(wav_paths), args.batch_size)):      
+            batch = load_wavs(wav_paths[i:min(i+args.batch_size, len(wav_paths))])
+            if args.model_name == 'clmr_base':
+                batch = batch.to(device)
             with torch.no_grad():
-                embeddings = model(batch)
+                outputs = model(batch)
+                embeddings = outputs.detach().cpu()
                 all_embeddings[i:min(i+args.batch_size, len(wav_paths))] = embeddings
 
         # Save embeddings tensor
         torch.save(all_embeddings, f'eval_results/embeddings_{args.model_name}.pt')
-        print(all_embeddings.shape)
+        print(f'all_embeddings.shape: {all_embeddings.shape}')
     else:
         all_embeddings=torch.load(args.embeddings_path)
 

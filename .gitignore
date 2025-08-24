@@ -1,3 +1,4 @@
+train_test/clmr/checkpoints/*
 .resume
 *.wav
 train_test/venv

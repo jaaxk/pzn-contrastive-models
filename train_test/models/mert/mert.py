@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 import torchaudio
 import os
-import soundfile as sf
 
 class MERT(nn.Module):
     def __init__(self, model_path):
@@ -13,25 +12,12 @@ class MERT(nn.Module):
         self.processor = Wav2Vec2FeatureExtractor.from_pretrained(model_path, trust_remote_code=True)
         self.aggregator = nn.Conv1d(in_channels=25, out_channels=1, kernel_size=1).to(self.device)
 
-    def load_wavs(self, wav_paths):
-        """
-        wav_paths: a list of paths to wav files
-        """
-        waveforms = []
-        for wav_path in wav_paths:
-            if not os.path.exists(wav_path):
-                print(f"Skipping {wav_path} because it does not exist")
-                waveform = np.zeros(24000*29)
-            waveform, sr = sf.read(wav_path, dtype='float32')
-            waveform = waveform.squeeze()
-            waveforms.append(waveform)
-        return waveforms
 
-    def forward(self, wav_paths):
+    def forward(self, waveforms):
         """
-        wav_paths: a list of paths to .wav files (mono, 24kHz)
+        waveforms: wav files loaded with utils.load_wavs()
         """
-        waveforms = self.load_wavs(wav_paths)
+        
         #print(waveforms)
         inputs = self.processor(waveforms, 
             sampling_rate=24000,
@@ -40,7 +26,7 @@ class MERT(nn.Module):
             truncation=True,
             max_length=720000).to(self.device) #30s of 24kHz audio
     
-        print(inputs['input_values'].shape) #batch size, samples (time*sample_rate)
+        #print(inputs['input_values'].shape) #batch size, samples (time*sample_rate)
 
         outputs = self.model(**inputs, output_hidden_states=True)
         
