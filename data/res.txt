@@ -1,44 +1,35 @@
-p
-Getting playlist tracks for train_tracks.csv
-Found 199 playlists for good vibes
-
-WARNING:root:Your application has reached a rate/request limit. Retry will occur after: 3352
-Playlist tracks: 100Playlist tracks: 200Playlist tracks: 300Playlist tracks: 400Playlist tracks: 500Playlist tracks: 600Playlist tracks: 700Playlist tracks: 800Found 200 playlists for punk
-Playlist tracks: 900Playlist tracks: 1000Playlist tracks: 1100Playlist tracks: 1200Playlist tracks: 1300Playlist tracks: 1400Playlist tracks: 1500Exausted playlist queries
+a
 Getting album tracks for train_tracks.csv
-Found 100 albums for a
-Album tracks: 100Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/18fcnZ1JvqMBC0PvUAWlKp
-Album tracks: 200Album tracks: 300Found 100 albums for b
-Album tracks: 400Album tracks: 500Album tracks: 600Found 100 albums for c
-Album tracks: 700Album tracks: 800Album tracks: 900Found 100 albums for d
-Album tracks: 1000Album tracks: 1100Album tracks: 1200Found 100 albums for e
-Album tracks: 1300Album tracks: 1400Album tracks: 1500Found 100 albums for f
-Album tracks: 1600Album tracks: 1700Album tracks: 1800Found 100 albums for g
-Album tracks: 1900Album tracks: 2000Found 100 albums for h
-Album tracks: 2100Album tracks: 2200Album tracks: 2300Found 100 albums for i
-Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/2zIl3eEUd51KdtqGyJw1sg
-Album tracks: 2400Album tracks: 2500Album tracks: 2600Found 100 albums for j
-Album tracks: 2700Album tracks: 2800Album tracks: 2900Found 100 albums for k
-Album tracks: 3000Album tracks: 3100Found 100 albums for l
-Album tracks: 3200Album tracks: 3300Album tracks: 3400Found 100 albums for m
-Album tracks: 3500Album tracks: 3600Album tracks: 3700Found 100 albums for n
-Album tracks: 3800Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/7HIXv1K13KjVgsbNIfWkAB
-Album tracks: 3900Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/0dj1CtyRxZ4bnIT4Q20jNT
-Found 100 albums for o
-Album tracks: 4000Album tracks: 4100Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/35xjQescuMPiwIctLA5v4Q
-Album tracks: 4200Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/7CqHXR9ixKqvNxqL0eW5Sk
-Album tracks: 4300Found 100 albums for p
-Album tracks: 4400Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/6up18WZ1Maw0PlqBlTwvuA
-Album tracks: 4500Found 100 albums for q
-Album tracks: 4600Album tracks: 4700Album tracks: 4800Found 100 albums for r
-Album tracks: 4900Album tracks: 5000Album tracks: 5100Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/1IizlKyC4zBvmYEht21UTz
-Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/2wOT9ZvAb5FNeaq200Vayl
-Found 100 albums for s
-Album tracks: 5200Album tracks: 5300Album tracks: 5400Found 100 albums for t
-Album tracks: 5500Album tracks: 5600Album tracks: 5700Found 100 albums for u
-Album tracks: 5800Album tracks: 5900Found 100 albums for v
-Album tracks: 6000Album tracks: 6100Album tracks: 6200Found 100 albums for w
-Album tracks: 6300Album tracks: 6400Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/6mioAARE2XCvTtNUvP5b7V
-Album tracks: 6500Found 100 albums for x
-Album tracks: 6600Album tracks: 6700Album tracks: 6800Found 100 albums for y
-WARNING:root:Your application has reached a rate/request limit. Retry will occur after: 13227
+Found 100 albums for z
+Album tracks: 100Album tracks: 200Exausted album queries
+Getting lastfm tracks for train_tracks.csv
+Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/1jMoqWkfjRDDZZ3ZLdcopE
+Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/3hzlF5hhliXmsxK8sBHfKJ
+Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/7AtcUQXvJnnwTrkUDYcYoV
+Lastfm tracks: 100Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/00K0B8nvfmTif7poYsk378
+Lastfm tracks: 200Lastfm tracks: 300Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/1Nb3mnnFcV2qz7z8Cv80Pf
+Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/3fNup3ZHQvP0sjed4BW5gm
+Lastfm tracks: 400Failed to fetch Spotify preview URL: 504 Server Error: Gateway Timeout for url: https://open.spotify.com/embed/track/3JsA2sWDNR9oQogGAzqqtH
+Traceback (most recent call last):
+  File "/gpfs/scratch/jvaska/pzn/data/get_dataset.py", line 360, in <module>
+    main()
+  File "/gpfs/scratch/jvaska/pzn/data/get_dataset.py", line 328, in main
+    get_lastfm_tracks(sp, n_tracks=200000, cluster_size=4) 
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/scratch/jvaska/pzn/data/get_dataset.py", line 180, in get_lastfm_tracks
+    similar_tracks = track.get_similar(limit=cluster_size-1)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/scratch/jvaska/pzn/data/venv/lib/python3.12/site-packages/pylast/__init__.py", line 2169, in get_similar
+    doc = self._request(self.ws_prefix + ".getSimilar", True, params)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/scratch/jvaska/pzn/data/venv/lib/python3.12/site-packages/pylast/__init__.py", line 1128, in _request
+    return _Request(self.network, method_name, params).execute(cacheable)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/scratch/jvaska/pzn/data/venv/lib/python3.12/site-packages/pylast/__init__.py", line 956, in execute
+    response = self._download_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/gpfs/scratch/jvaska/pzn/data/venv/lib/python3.12/site-packages/pylast/__init__.py", line 945, in _download_response
+    self._check_response_for_errors(response_text)
+  File "/gpfs/scratch/jvaska/pzn/data/venv/lib/python3.12/site-packages/pylast/__init__.py", line 974, in _check_response_for_errors
+    raise WSError(self.network, status, details)
+pylast.WSError: Track not found

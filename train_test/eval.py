@@ -107,7 +107,6 @@ def main():
     print(df.head())
    
     #download previews
-    print('df cluster ids: ', df['clusterID'].tolist())
     if args.model_name == 'clmr_base':
         from models.clmr.utils import clmr_load_wavs
         load_wavs = clmr_load_wavs
@@ -211,7 +210,7 @@ def main():
     generate_report(
         tsne_json_path=tsne_json_path,
         test_set_csv=args.test_set,
-        previews_dir=args.previews_dir,
+        previews_dir=os.path.join(args.previews_dir, f'{str(sample_rate)}Hz'),
         output_html=output_html,
     )
 

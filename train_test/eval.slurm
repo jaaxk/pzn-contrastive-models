@@ -9,4 +9,5 @@ module load ffmpeg
 
 source venv/bin/activate
 python eval.py \
-    --test_set ../data/test_tracks.csv
+    --test_set ../data/test_tracks.csv \
+    --model_name clmr_base
