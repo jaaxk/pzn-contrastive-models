@@ -1,4 +1,4 @@
-# Encoding short music videos with MERT and [CLMR](https://github.com/Spijkervet/CLMR)
+# Encoding audio previews for music personalization with MERT and [CLMR](https://github.com/Spijkervet/CLMR)
 
 
 ## Evaluation
